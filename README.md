@@ -32,7 +32,7 @@ This is a Django-based REST API web application integrated with MongoDB. It allo
 - **PDF Processing**: PyMuPDF (fitz)
 - **Text Processing**: SpaCy
 - **Frontend**: HTML (Bootstrap for styling)
-- **Deployment**: Vercel
+- **Deployment**: Render
 - **CI/CD**: GitHub Actions
 
 ---
@@ -101,31 +101,10 @@ Go to `http://127.0.0.1:8000/upload/` and upload a PDF file with an email. You w
 
 ## Deployment
 
-This application is deployed on Vercel. You can access the live version via the following link:
+This application is deployed on Render. You can access the live version via the following link:
 
-**[Live Application URL](https://dowell.vercel.app)**
+**[Live Application URL](https://dowell-pdf-extractor.onrender.com/)**
 
-### Steps to Deploy on Vercel:
-
-1. **Install Vercel CLI**
-
-```bash
-npm install -g vercel
-```
-
-2. **Login to Vercel**
-
-```bash
-vercel login
-```
-
-3. **Deploy**
-
-Inside your project directory:
-
-```bash
-vercel
-```
 
 4. **GitHub Actions CI/CD**
 
