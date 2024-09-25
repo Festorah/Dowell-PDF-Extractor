@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Upload and Extraction</title>
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+    <style>
+        #successMessage {
+            display: none;
+        }
+        #dataOverview {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center">Upload PDF and Extract Data</h2>
+    
+    <!-- File Upload Form -->
+    <form id="pdfUploadForm" class="mt-4">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter email" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="file" class="form-label">Choose PDF File</label>
+            <input type="file" class="form-control" id="file" accept="application/pdf" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload and Extract</button>
+    </form>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="alert alert-success mt-4" role="alert">
+        PDF uploaded and processed successfully! <br>
+        <a href="#" id="viewExtractedData">View extracted data</a> or 
+        <a href="#" id="downloadCSV">Download CSV</a>
+    </div>
+
+    <!-- Data Overview -->
+    <div id="dataOverview" class="mt-4">
+        <h4>Summary of Extracted Content</h4>
+        <p>Here are some key nouns and verbs extracted from your PDF:</p>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Token</th>
+                    <th>Part of Speech</th>
+                </tr>
+            </thead>
+            <tbody id="extractedTokens">
+                <!-- Insert extracted data dynamically -->
+            </tbody>
+        </table>
+
+        <a href="#" class="btn btn-info" id="downloadFullData">Download Full Data</a>
+    </div>
+</div>
+
+<!-- Bootstrap and jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const form = $('#pdfUploadForm');
+        const successMessage = $('#successMessage');
+        const dataOverview = $('#dataOverview');
+        const extractedTokens = $('#extractedTokens');
+        
+        // Handle form submission for PDF upload
+        form.on('submit', function (e) {
+            e.preventDefault();
+            const email = $('#email').val();
+            const file = $('#file')[0].files[0];
+
+            if (!file || !email) {
+                alert('Please provide both an email and a PDF file.');
+                return;
+            }
+
+            // Create FormData object for file and email
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('email', email);
+
+            // Send AJAX request to backend
+            $.ajax({
+                url: '/upload/',  // Replace with the correct endpoint
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    // Handle success: Display success message and parsed data
+                    successMessage.show();
+                    populateExtractedData(response.tags);
+                },
+                error: function (xhr, status, error) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
+        // Populate the extracted data in the table
+        function populateExtractedData(data) {
+            extractedTokens.empty();  // Clear existing data
+            data.forEach(function (item) {
+                extractedTokens.append(`<tr><td>${item.token}</td><td>${item.pos}</td></tr>`);
+            });
+            dataOverview.show();  // Show data overview section
+        }
+
+        // Handle the "View extracted data" link
+        $('#viewExtractedData').on('click', function (e) {
+            e.preventDefault();
+            dataOverview.show();
+        });
+
+        // Handle the "Download CSV" link
+        $('#downloadCSV').on('click', function (e) {
+            e.preventDefault();
+            downloadCSV();
+        });
+
+        // Download extracted data as CSV
+        function downloadCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Token,Part of Speech\n";
+            $('#extractedTokens tr').each(function () {
+                const token = $(this).find('td:nth-child(1)').text();
+                const pos = $(this).find('td:nth-child(2)').text();
+                csvContent += token + "," + pos + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "extracted_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Handle the "Download Full Data" link
+        $('#downloadFullData').on('click', function (e) {
+            e.preventDefault();
+            downloadCSV();  // Can be modified to download other formats (like PDF) if needed
+        });
+    });
+</script>
+
+</body>
+</html>
