@@ -63,7 +63,6 @@ class PdfUploadView(APIView):
             except DuplicateKeyError:
                 return JsonResponse({"error": "Email already exists"}, status=400)
 
-            # Return a response with the extracted POS tags
             return JsonResponse(
                 {"message": "File processed successfully", "tags": pos_tags}
             )
